@@ -290,7 +290,6 @@ order by total_weight desc
 limit 1
 ;
 
-
 -- LeetCode Problem 1907: Count Salary Categories
 -- Source: LeetCode
 -- https://leetcode.com/problems/count-salary-categories/
@@ -321,4 +320,195 @@ select
     count(*) as accounts_count 
 from accounts 
 where income > 50000
+;
+
+-- LeetCode Problem 1978: Employees Whose Manager Left the Company
+-- Source: LeetCode
+-- https://leetcode.com/problems/employees-whose-manager-left-the-company/
+--
+-- Goal:
+-- Find employees earning less than $30,000 whose manager_id
+-- points to a manager who no longer exists in the table.
+
+-- My solution:
+select
+    employee_id
+from employees
+where 
+    salary < 30000
+    and manager_id is not null 
+    and manager_id not in (
+        select
+            distinct employee_id
+        from employees
+        )
+order by employee_id
+;
+
+-- LeetCode Problem 626: Exchange Seats
+-- Source: LeetCode
+-- https://leetcode.com/problems/exchange-seats/
+--
+-- Goal:
+-- Swap the seat id of every two consecutive students, leaving
+-- the last student's id unchanged if the total count is odd.
+
+-- My solution:
+select 
+    case 
+        when id % 2 = 1 and id + 1 in (
+            select 
+                id 
+            from seat
+            ) then id + 1
+        when id % 2 = 0 then id - 1
+        else id
+    end as id, 
+    student
+from seat
+order by id
+;
+
+-- LeetCode Problem 1341: Movie Rating
+-- Source: LeetCode
+-- https://leetcode.com/problems/movie-rating/
+--
+-- Goal:
+-- Find the user who rated the most movies (ties broken
+-- alphabetically), and the movie with the highest average
+-- rating in February 2020 (ties broken alphabetically).
+
+-- My solution:
+(select
+    name as results
+from users
+    left join movierating
+        on users.user_id = movierating.user_id
+group by movierating.user_id
+having count(distinct movierating.movie_id)
+order by 
+    count(distinct movierating.movie_id) desc,
+    name asc
+limit 1
+)
+
+union all
+
+(select 
+    title as results
+from movierating
+    left join movies
+        on movierating.movie_id = movies.movie_id
+where 
+    year(created_at) = 2020 
+    and month(created_at) = 2
+group by movierating.movie_id
+having avg(rating)
+order by 
+    avg(rating) desc,
+    title asc
+    limit 1
+)
+;
+
+-- LeetCode Problem 1321: Restaurant Growth
+-- Source: LeetCode
+-- https://leetcode.com/problems/restaurant-growth/
+--
+-- Goal:
+-- Compute a 7-day moving sum and average of customer spending,
+-- rounded to two decimal places, ordered by visit date.
+
+-- My solution:
+select 
+    distinct visited_on,
+    sum(amount) over (order by visited_on range between interval 6 day preceding and current row) as amount,
+    round(sum(amount) over (order by visited_on range between interval 6 day preceding and current row) / 7, 2) as average_amount
+from customer
+limit 10000 offset 6
+;
+
+-- LeetCode Problem 602: Friend Requests II: Who Has the Most Friends
+-- Source: LeetCode
+-- https://leetcode.com/problems/friend-requests-ii-who-has-the-most-friends/
+--
+-- Goal:
+-- Find the person with the most total friends (as either
+-- requester or accepter) and their friend count.
+
+-- My solution:
+select 
+    id, 
+    count(*) AS num
+from (
+    select 
+        requester_id as id 
+    from requestaccepted
+
+    union all
+    
+    select
+        accepter_id as id
+    from requestaccepted
+) as ra
+group by id
+order by num desc
+limit 1
+;
+
+-- LeetCode Problem 585: Investments in 2016
+-- Source: LeetCode
+-- https://leetcode.com/problems/investments-in-2016/
+--
+-- Goal:
+-- Sum tiv_2016 for policyholders who share their tiv_2015 value
+-- with at least one other policyholder, but whose (lat, lon)
+-- location is unique.
+
+-- My solution:
+select
+    round(sum(tiv_2016), 2) as tiv_2016
+from insurance
+where
+    tiv_2015 in (
+        select 
+            tiv_2015
+        from insurance
+        group by tiv_2015
+        having count(*) > 1
+    )
+    and (lat, lon) in (
+        select
+            lat, 
+            lon
+        from insurance
+        group by lat, lon
+        having count(*) = 1
+    )
+;
+
+-- LeetCode Problem 185: Department Top Three Salaries
+-- Source: LeetCode
+-- https://leetcode.com/problems/department-top-three-salaries/
+--
+-- Goal:
+-- Find employees whose salary ranks in the top three unique
+-- salaries within their department.
+
+-- My solution:
+select
+    department,
+    employee,
+    salary
+from (
+    select    
+        d.name as department,
+        e.name as employee,
+        salary,
+        dense_rank() over (partition by e.departmentid order by salary desc) as rnk
+    from employee as e
+        left join department as d
+            on e.departmentid = d.id
+) as t
+where rnk < 4
 ;
