@@ -512,3 +512,133 @@ from (
 ) as t
 where rnk < 4
 ;
+
+-- LeetCode Problem 608: Tree Node
+-- Source: LeetCode
+-- https://leetcode.com/problems/tree-node/
+--
+-- Goal:
+-- Classify each node in a tree as Root, Inner, or Leaf based on
+-- its position relative to parent and child relationships.
+
+-- My solution:
+select
+    id,
+    case
+        when p_id is null then 'Root'
+        when id in 
+            (select distinct p_id from tree where p_id != 
+                (select id from tree where p_id is null)) then 'Inner'
+        else 'Leaf'
+    end as type
+from tree
+order by id
+;
+
+-- LeetCode Problem 1158: Market Analysis I
+-- Source: LeetCode
+-- https://leetcode.com/problems/market-analysis-i/
+--
+-- Goal:
+-- For each user, return their join date and the number of orders
+-- they placed as a buyer in 2019.
+
+-- My solution:
+with bt as (
+        select 
+            distinct user_id as buyer_id,
+            join_date
+        from users
+        order by buyer_id
+)
+
+select
+    bt.buyer_id,
+    bt.join_date,
+    coalesce(count(orders.buyer_id), 0) as orders_in_2019
+    from bt
+    left join orders
+        on bt.buyer_id = orders.buyer_id
+        and year(order_date) = 2019
+    group by bt.buyer_id
+;
+
+-- LeetCode Problem 3475: DNA Pattern Recognition
+-- Source: LeetCode
+-- https://leetcode.com/problems/dna-pattern-recognition/
+--
+-- Goal:
+-- Flag each DNA sample for whether it starts with a start codon,
+-- ends with a stop codon, contains a repeated motif, or has a
+-- run of at least three consecutive G's.
+
+-- My solution:
+select
+    sample_id,
+    dna_sequence,
+    species,
+    case when left(dna_sequence, 3) = 'ATG' then 1 else 0 end as has_start,
+    case when right(dna_sequence, 3) = 'TAA'
+        or right(dna_sequence, 3) = 'TAG'
+        or right(dna_sequence, 3) = 'TGA' then 1
+    else 0 end as has_stop,
+    case when dna_sequence like '%atat%' then 1 else 0 end as has_atat,
+    case when dna_sequence like '%ggg%' then 1 else 0 end as has_ggg
+
+from samples
+;
+
+-- LeetCode Problem 3497: Analyze Subscription Conversion
+-- Source: LeetCode
+-- https://leetcode.com/problems/analyze-subscription-conversion/
+--
+-- Goal:
+-- Identify users who converted from free trial to paid, and
+-- calculate each user's average daily activity duration during
+-- their trial period versus their paid period.
+
+-- My solution:
+with tt as (
+    select 
+        user_id,
+        round(avg(activity_duration), 2) as trial_avg_duration
+    from useractivity
+    where activity_type = 'free_trial'
+    group by user_id
+),
+
+pt as (
+    select 
+        user_id,
+        round(avg(activity_duration), 2) as paid_avg_duration
+    from useractivity
+    where activity_type = 'paid'
+    group by user_id    
+),
+
+mt as (
+    select 
+        user_id
+    from (
+        select 
+            user_id,
+            max(case when activity_type = 'free_trial' then activity_date end) as last_trial_date,
+            min(case when activity_type = 'paid' then activity_date end) as first_paid_date
+        from useractivity
+        group by user_id
+    )
+    where 
+        first_paid_date is not null 
+        and first_paid_date > last_trial_date
+)
+
+select 
+    mt.user_id,
+    trial_avg_duration,
+    paid_avg_duration
+from mt
+    left join tt
+        on mt.user_id = tt.user_id
+    left join pt
+        on mt.user_id = pt.user_id
+;
