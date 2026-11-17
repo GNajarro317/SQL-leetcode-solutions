@@ -1,6 +1,6 @@
 ### Date created
 Date project was created: 09-14-2026 |
-Date README file was last updated: 10-05-2026
+Date README file was last updated: 11-17-2026
 
 ### Project Title
 LeetCode SQL Aggregate Functions Practice
@@ -33,6 +33,10 @@ This project contains my solutions to SQL problems from LeetCode. It is included
 - 1158 - Market Analysis I: left joins and date filtering
 - 3475 - DNA Pattern Recognition: string pattern matching with LIKE and LEFT/RIGHT
 - 3497 - Analyze Subscription Conversion: multi-CTE behavioral analysis
+- 1393 - Capital Gain/Loss: conditional aggregation with nested subqueries
+- 3657 - Find Loyal Customers: conditional counts, date differences, and rate filtering
+- 1084 - Sales Analysis III: left joins with HAVING on date ranges
+- 184 - Department Highest Salary: CTEs and grouped maximums
 
 The problem statements and database schemas are provided by LeetCode. The SQL solutions in this repository are my own.
 
@@ -50,9 +54,8 @@ These problems reinforced:
 - Range-based window frames for moving averages
 - Tree/hierarchy classification logic
 - String pattern matching with LIKE and substring functions
+- HAVING with MIN and MAX for date range checks
 
-### Data Source
-LeetCode:
 ### Data Source
 LeetCode:
 1. <a href="https://leetcode.com/problems/monthly-transactions-i/">Monthly Transactions I - 1193</a>
@@ -79,3 +82,7 @@ LeetCode:
 22. <a href="https://leetcode.com/problems/market-analysis-i/">Market Analysis I - 1158</a>
 23. <a href="https://leetcode.com/problems/dna-pattern-recognition/">DNA Pattern Recognition - 3475</a>
 24. <a href="https://leetcode.com/problems/analyze-subscription-conversion/">Analyze Subscription Conversion - 3497</a>
+25. <a href="https://leetcode.com/problems/capital-gainloss/">Capital Gain/Loss - 1393</a>
+26. <a href="https://leetcode.com/problems/find-loyal-customers/">Find Loyal Customers - 3657</a>
+27. <a href="https://leetcode.com/problems/sales-analysis-iii/">Sales Analysis III - 1084</a>
+28. <a href="https://leetcode.com/problems/department-highest-salary/">Department Highest Salary - 184</a>
